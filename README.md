@@ -13,7 +13,7 @@ Each form might have a FormType file.
 
 The example below use the lib_doctrine (cf. https://github.com/loremipsum31/lib_doctrine):
 
-a form for entity group => GroupType see below
+A form for entity group => GroupType see below
 ------
 
 ##### Exemple doctrine entities
