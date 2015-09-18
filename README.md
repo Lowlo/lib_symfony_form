@@ -14,6 +14,7 @@ Each form might have a FormType file.
 The example below use the lib_doctrine (cf. https://github.com/loremipsum31/lib_doctrine):
 
 A form for entity group => GroupType see below
+
 ------
 
 ##### Exemple doctrine entities
@@ -97,6 +98,7 @@ class GroupType extends AbstractType
     }
 }
 ```
+
 #### Example modify.php
 
 ```
@@ -137,6 +139,7 @@ if (true === $twig_util->resolve_path("modify_group.lte") ) {
 }
 
 ```
+
 #### Example modify_group.lte
 
 ```
@@ -155,6 +158,7 @@ if (true === $twig_util->resolve_path("modify_group.lte") ) {
 
 {{ form_end(form) }}
 ```
+
 #### Example save_group.php
 
 ```
