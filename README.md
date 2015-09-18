@@ -99,7 +99,7 @@ class GroupType extends AbstractType
 }
 ```
 
-#### Example modify.php
+##### Example modify.php
 
 ```
 global $parser, $loader, $formFactory;
@@ -140,7 +140,7 @@ if (true === $twig_util->resolve_path("modify_group.lte") ) {
 
 ```
 
-#### Example modify_group.lte
+##### Example modify_group.lte
 
 ```
 {{ form_start(form, {attr: {class: 'form-horizontal' }, action: WB_URL ~ '/modules/articles/save_group.php'}) }}
@@ -159,7 +159,7 @@ if (true === $twig_util->resolve_path("modify_group.lte") ) {
 {{ form_end(form) }}
 ```
 
-#### Example save_group.php
+##### Example save_group.php
 
 ```
 global $parser, $loader, $formFactory;
