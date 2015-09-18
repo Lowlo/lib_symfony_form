@@ -1,9 +1,15 @@
-# lib_doctrine
+# lib_symfony_form
 #### lib_symfony_form for Lepton CMS 2 series
 
-This module include the lib_twig module so, if you use this module in your module you not have to include the lib_twig library file
+This module include the lib_twig module so, if you use this module in your module you do not have to include the lib_twig library file
 
-Each for might have a FormType file.
+All the documentation about symfony_form can be see here:
+
+http://symfony.com/fr/doc/current/reference/forms/types.html
+
+http://symfony.com/doc/current/components/form/introduction.html
+
+Each form might have a FormType file.
 
 The example below use the lib_doctrine (cf. https://github.com/loremipsum31/lib_doctrine):
 
