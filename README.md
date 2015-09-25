@@ -19,8 +19,10 @@ A form for entity group => GroupType see below
 
 ##### Exemple doctrine entities
 
-```
+```php
 #modules/articles/Entity/Group.php
+<?php
+
 namespace Articles\Entity;
 
 /**
@@ -56,12 +58,15 @@ class Group
      * @ORM\Column(name="active", type="boolean", nullable=false)
      */
     protected $active = false;
+    
+    //Getter and setter must be define
 ```
 
 ##### Example Symfony form
 
-```
+```php
 #modules/articles/Form/GroupType.php
+<?php
 
 namespace Articles\Form;
 
@@ -101,8 +106,10 @@ class GroupType extends AbstractType
 
 ##### Example modify.php
 
-```
+```php
 global $parser, $loader, $formFactory;
+<?php
+
 if (!isset($formFactory)) {
 	//Require de la lib form & twig
 	require_once( LEPTON_PATH."/modules/lib_symfony_form/library.php" );
@@ -159,7 +166,7 @@ if (isset($_POST)) {
 
 ##### Example modify_group.lte
 
-```
+```twig
 {{ form_start(form) }}
     <input type="hidden" name="group_id" value="{{ form.vars.data.id }}" />
     <input type="hidden" name="page_id" value="{{ form.vars.data.page.id }}" />
