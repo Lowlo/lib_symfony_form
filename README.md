@@ -134,7 +134,7 @@ $form  = $formFactory->create(new \News\Form\NewsType(), $group);
 if (isset($_POST)) {
 	$form->handleRequest();
 	$fail_url =  sprintf(
-		'%s/modules/articles/modify_news.php?page_id=%d&section_id=%d&group_id=%d',
+		'%s/modules/news/modify_news.php?page_id=%d&section_id=%d&group_id=%d',
 		WB_URL, $page_id, $section_id, $group->getId()
 	)
 	if($form->isValid()){
