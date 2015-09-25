@@ -123,19 +123,36 @@ if (!isset($entityManager)) {
 	require_once(LEPTON_PATH."/modules/lib_doctrine/library.php");
 }
 
-
 $group = $entityManager->getRepository('Articles\Entity\Group')->find($group_id);
+$form  = $formFactory->create(new \Articles\Form\GroupType(), $group);
 
-$form = $formFactory->create(new \Articles\Form\GroupType(), $group);
-
-if (true === $twig_util->resolve_path("modify_group.lte") ) {
-	echo $parser->render(
-		"@news_events/modify_group.lte",
-		array(
-			'form' 	  => $form->createView(),
-			'TEXT'    => $TEXT,
-		)
-	);
+if (isset($_POST)) {
+	$form->handleRequest();
+	$fail_url =  sprintf(
+		'%s/modules/articles/modify_group.php?page_id=%d&section_id=%d&group_id=%d',
+		WB_URL, $page_id, $section_id, $group->getId()
+	)
+	if($form->isValid()){
+		try{
+			$entityManager->persist($group);
+			$entityManager->flush();
+			$admin->print_success($TEXT['SUCCESS'], ADMIN_URL.'/pages/modify.php?page_id='.$page_id);
+		}catch (\Exception $e) {
+			$admin->print_error($e->getMessage(), $fail_url);
+		}
+	} else {
+		$admin->print_error($MESSAGE['GENERIC']['FILL_IN_ALL'], $fail_url);
+	}
+} else {
+	if (true === $twig_util->resolve_path("modify_group.lte") ) {
+		echo $parser->render(
+			"@news_events/modify_group.lte",
+			array(
+				'form' 	  => $form->createView(),
+				'TEXT'    => $TEXT,
+			)
+		);
+	}
 }
 
 ```
@@ -143,7 +160,7 @@ if (true === $twig_util->resolve_path("modify_group.lte") ) {
 ##### Example modify_group.lte
 
 ```
-{{ form_start(form, {attr: {class: 'form-horizontal' }, action: WB_URL ~ '/modules/articles/save_group.php'}) }}
+{{ form_start(form) }}
     <input type="hidden" name="group_id" value="{{ form.vars.data.id }}" />
     <input type="hidden" name="page_id" value="{{ form.vars.data.page.id }}" />
     <input type="hidden" name="section_id" value="{{ form.vars.data.section.id }}" />
@@ -157,54 +174,4 @@ if (true === $twig_util->resolve_path("modify_group.lte") ) {
     </div>
 
 {{ form_end(form) }}
-```
-
-##### Example save_group.php
-
-```
-global $parser, $loader, $formFactory;
-if (!isset($formFactory)) {
-	//Require de la lib form & twig
-	require_once( LEPTON_PATH."/modules/lib_symfony_form/library.php" );
-}
-
-$loader->prependPath( dirname(__FILE__)."/templates/backend/", "article" );
-
-$frontend_template_path = LEPTON_PATH."/templates/" . DEFAULT_TEMPLATE . "/backend/article/";
-$module_template_path = dirname(__FILE__)."/templates/backend/";
-
-require_once (LEPTON_PATH."/modules/lib_twig/classes/class.twig_utilities.php");
-$twig_util = new twig_utilities( $parser, $loader, $module_template_path, $frontend_template_path );
-$twig_util->template_namespace = "article";
-
-/** @var $entityManager \Doctrine\ORM\EntityManager */
-global $entityManager;
-if (!isset($entityManager)) {
-	require_once(LEPTON_PATH."/modules/lib_doctrine/library.php");
-}
-
-
-$group = $entityManager->getRepository('Articles\Entity\Group')->find($group_id);
-
-$form = $formFactory->create(new \Articles\Form\GroupType(), $group);
-
-
-$form->handleRequest();
-if($form->isValid()){
-	try{
-		$entityManager->persist($group);
-		$entityManager->flush();
-		$admin->print_success($TEXT['SUCCESS'], ADMIN_URL.'/pages/modify.php?page_id='.$page_id);
-	}catch (\Exception $e) {
-		$admin->print_error(
-			$e->getMessage(),
-			WB_URL.'/modules/articles/modify_group.php?page_id='.$page_id.'&section_id='.$section_id.'&group_id='.$group->getId()
-		);
-	}
-} else {
-	$admin->print_error(
-		$MESSAGE['GENERIC']['FILL_IN_ALL'],
-		WB_URL.'/modules/articles/modify_group.php?page_id='.$page_id.'&section_id='.$section_id.'&group_id='.$id
-	);
-}
 ```
