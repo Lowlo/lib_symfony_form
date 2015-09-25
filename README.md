@@ -1,35 +1,33 @@
 # lib_symfony_form
 #### lib_symfony_form for Lepton CMS 2 series
 
-This module include the lib_twig module so, if you use this module in your module you do not have to include the lib_twig library file
+This module require the lib_twig module.
 
-All the documentation about symfony_form can be see here:
-
-http://symfony.com/fr/doc/current/reference/forms/types.html
-
+All the documentation about Symfony Form component can be see here:
 http://symfony.com/doc/current/components/form/introduction.html
 
-Each form might have a FormType file.
+And examples how to use here:
+http://symfony.com/fr/doc/current/reference/forms/types.html
 
 The example below use the lib_doctrine (cf. https://github.com/loremipsum31/lib_doctrine):
 
-A form for entity group => GroupType see below
+An entity News with a form NewsType
 
 ------
 
 ##### Exemple doctrine entities
 
 ```php
-#modules/articles/Entity/Group.php
+#modules/news/Entity/News.php
 <?php
 
-namespace Articles\Entity;
+namespace News\Entity;
 
 /**
- * @ORM\Table(name="lep_mod_articles_groups")
+ * @ORM\Table(name="lep_mod_news")
  * @ORM\Entity
  */
-class Group
+class News
 {
     /**
      * @var \Section
@@ -65,16 +63,16 @@ class Group
 ##### Example Symfony form
 
 ```php
-#modules/articles/Form/GroupType.php
+#modules/news/Form/NewsType.php
 <?php
 
-namespace Articles\Form;
+namespace News\Form;
 
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class GroupType extends AbstractType
+class NewsType extends AbstractType
 {
 
     /**
@@ -99,12 +97,12 @@ class GroupType extends AbstractType
      */
     public function getName()
     {
-        return 'post_group';
+        return 'news_form';
     }
 }
 ```
 
-##### Example modify.php
+##### Example modify_news.php
 
 ```php
 global $parser, $loader, $formFactory;
@@ -115,14 +113,14 @@ if (!isset($formFactory)) {
 	require_once( LEPTON_PATH."/modules/lib_symfony_form/library.php" );
 }
 
-$loader->prependPath( dirname(__FILE__)."/templates/backend/", "article" );
+$loader->prependPath( dirname(__FILE__)."/templates/backend/", "news" );
 
-$frontend_template_path = LEPTON_PATH."/templates/" . DEFAULT_TEMPLATE . "/backend/article/";
+$frontend_template_path = LEPTON_PATH."/templates/" . DEFAULT_TEMPLATE . "/backend/news/";
 $module_template_path = dirname(__FILE__)."/templates/backend/";
 
 require_once (LEPTON_PATH."/modules/lib_twig/classes/class.twig_utilities.php");
 $twig_util = new twig_utilities( $parser, $loader, $module_template_path, $frontend_template_path );
-$twig_util->template_namespace = "article";
+$twig_util->template_namespace = "news";
 
 /** @var $entityManager \Doctrine\ORM\EntityManager */
 global $entityManager;
@@ -130,13 +128,13 @@ if (!isset($entityManager)) {
 	require_once(LEPTON_PATH."/modules/lib_doctrine/library.php");
 }
 
-$group = $entityManager->getRepository('Articles\Entity\Group')->find($group_id);
-$form  = $formFactory->create(new \Articles\Form\GroupType(), $group);
+$group = $entityManager->getRepository('News\Entity\News')->find($group_id);
+$form  = $formFactory->create(new \News\Form\NewsType(), $group);
 
 if (isset($_POST)) {
 	$form->handleRequest();
 	$fail_url =  sprintf(
-		'%s/modules/articles/modify_group.php?page_id=%d&section_id=%d&group_id=%d',
+		'%s/modules/articles/modify_news.php?page_id=%d&section_id=%d&group_id=%d',
 		WB_URL, $page_id, $section_id, $group->getId()
 	)
 	if($form->isValid()){
@@ -151,9 +149,9 @@ if (isset($_POST)) {
 		$admin->print_error($MESSAGE['GENERIC']['FILL_IN_ALL'], $fail_url);
 	}
 } else {
-	if (true === $twig_util->resolve_path("modify_group.lte") ) {
+	if (true === $twig_util->resolve_path("modify_news.lte") ) {
 		echo $parser->render(
-			"@news_events/modify_group.lte",
+			"@news/modify_news.lte",
 			array(
 				'form' 	  => $form->createView(),
 				'TEXT'    => $TEXT,
@@ -164,11 +162,10 @@ if (isset($_POST)) {
 
 ```
 
-##### Example modify_group.lte
+##### Example modify_news.lte
 
 ```twig
 {{ form_start(form) }}
-    <input type="hidden" name="group_id" value="{{ form.vars.data.id }}" />
     <input type="hidden" name="page_id" value="{{ form.vars.data.page.id }}" />
     <input type="hidden" name="section_id" value="{{ form.vars.data.section.id }}" />
 
