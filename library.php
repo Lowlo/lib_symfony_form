@@ -57,9 +57,6 @@ $parser->addExtension(
 /** @var \Symfony\Component\Form\FormFactoryInterface $formFactory */
 global $formFactory;
 
-$container = new \Symfony\Component\DependencyInjection\Container(
-	new \Symfony\Component\DependencyInjection\ParameterBag\ParameterBag()
-);
 //($name, array $connections, array $managers, $defaultConnection, $defaultManager, $proxyInterfaceName)
 $managerRegistry = new \LibSymfonyForm\Persistence\ManagerRegistry(
 	null,
@@ -69,8 +66,8 @@ $managerRegistry = new \LibSymfonyForm\Persistence\ManagerRegistry(
 	null,
 	'\Doctrine\ORM\Proxy\Proxy'
 );
-$container->set('doctrine.entity_manager', $entityManager);
-$managerRegistry->setContainer($container);
+$managerRegistry->setService('doctrine.entity_manager', $entityManager);
+
 $builder = new \Symfony\Component\Form\FormFactoryBuilder();
 $builder->addExtension(new \Symfony\Component\Form\Extension\Core\CoreExtension());
 $builder->addExtension(new \Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension($managerRegistry));

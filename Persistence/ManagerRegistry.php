@@ -10,9 +10,24 @@ class ManagerRegistry extends AbstractManagerRegistry
 {
 
     /**
-     * @var ContainerInterface
+     * @var array
      */
-    protected $container;
+    protected $container = array();
+
+    /**
+     * Fetches/creates the given services.
+     *
+     * A service in this context is connection or a manager instance.
+     *
+     * @param string $name The name of the service.
+     *
+     * @param $value
+     * @return object The instance of the given service.
+     */
+    public function setService($name, $value)
+    {
+        $this->container[$name] = $value;
+    }
 
     /**
      * Fetches/creates the given services.
@@ -25,7 +40,7 @@ class ManagerRegistry extends AbstractManagerRegistry
      */
     protected function getService($name)
     {
-        return $this->container->get($name);
+        return $this->container[$name];
     }
 
     /**
@@ -39,7 +54,7 @@ class ManagerRegistry extends AbstractManagerRegistry
      */
     protected function resetService($name)
     {
-        $this->container->set($name, null);
+        $this->container[$name] = null;
     }
 
     /**
@@ -54,10 +69,5 @@ class ManagerRegistry extends AbstractManagerRegistry
     public function getAliasNamespace($alias)
     {
         throw new \BadMethodCallException('Namespace aliases not supported.');
-    }
-
-    public function setContainer($container)
-    {
-        $this->container = $container;
     }
 }

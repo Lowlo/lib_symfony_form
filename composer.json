@@ -2,7 +2,6 @@
     "name": "lowlo/lib_symfony_form",
     "require": {
         "symfony/form": "~2.0",
-        "symfony/dependency-injection": "~2.0",
         "symfony/doctrine-bridge": "~2.0",
         "symfony/twig-bridge": "~2.0"
     },
@@ -11,5 +10,8 @@
             "name": "Laurent",
             "email": "laurent.paganin@gmail.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": { "LibSymfonyForm\\": "" }
+    }
 }
