@@ -1,5 +1,8 @@
-{% extends 'bootstrap_3_layout.html.twig' %}
+{% extends 'form_table_layout.html.twig' %}
 
+{% block wysiwyg_widget %}
+    {{ wysiwyg|raw }}
+{% endblock %}
 
 {% block date_widget -%}
     {% if widget == 'single_text' %}

@@ -15,10 +15,6 @@ class ManagerRegistry extends AbstractManagerRegistry
     protected $container = array();
 
     /**
-     * Fetches/creates the given services.
-     *
-     * A service in this context is connection or a manager instance.
-     *
      * @param string $name The name of the service.
      *
      * @param $value

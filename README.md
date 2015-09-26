@@ -56,6 +56,13 @@ class News
      * @ORM\Column(name="active", type="boolean", nullable=false)
      */
     protected $active = false;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="content", type="text", nullable=false)
+     */
+    protected $content = '';
     
     //Getter and setter must be define
 ```
@@ -87,6 +94,7 @@ class NewsType extends AbstractType
             ->add('active', 'checkbox', array(
                 'required' => false,
             ))
+            ->add('content', new Wysiwyg())
         ;
     }
 
@@ -128,36 +136,49 @@ if (!isset($entityManager)) {
 	require_once(LEPTON_PATH."/modules/lib_doctrine/library.php");
 }
 
-$group = $entityManager->getRepository('News\Entity\News')->find($group_id);
-$form  = $formFactory->create(new \News\Form\NewsType(), $group);
+// Get id
+if(!isset($_GET['news_id']) OR !is_numeric($_GET['news_id'])) {
+	header("Location: ".ADMIN_URL."/pages/index.php");
+	exit(0);
+} else {
+	$news_id = (int)$_GET['news_id'];
+}
 
-if (isset($_POST)) {
+$news = $entityManager->getRepository('News\Entity\News')->find($news_id);
+$form  = $formFactory->create(new \News\Form\NewsType(), $news);
+
+$messages = array();
+if (!empty($_POST)) {
 	$form->handleRequest();
-	$fail_url =  sprintf(
-		'%s/modules/news/modify_news.php?page_id=%d&section_id=%d&group_id=%d',
-		WB_URL, $page_id, $section_id, $group->getId()
-	)
 	if($form->isValid()){
 		try{
-			$entityManager->persist($group);
+			$entityManager->persist($news);
 			$entityManager->flush();
-			$admin->print_success($TEXT['SUCCESS'], ADMIN_URL.'/pages/modify.php?page_id='.$page_id);
+			$admin->print_success($TEXT['SUCCESS'], ADMIN_URL . '/pages/modify.php?page_id=' . $page_id);
 		}catch (\Exception $e) {
-			$admin->print_error($e->getMessage(), $fail_url);
+			$messages[] = array(
+				'type' => 'error',
+				'message' => $e->getMessage(),
+			);
 		}
 	} else {
-		$admin->print_error($MESSAGE['GENERIC']['FILL_IN_ALL'], $fail_url);
-	}
-} else {
-	if (true === $twig_util->resolve_path("modify_news.lte") ) {
-		echo $parser->render(
-			"@news/modify_news.lte",
-			array(
-				'form' 	  => $form->createView(),
-				'TEXT'    => $TEXT,
-			)
+		$messages[] = array(
+			'type' => 'error',
+			'message' => $MESSAGE['GENERIC']['FILL_IN_ALL']
 		);
 	}
+}
+
+if (true === $twig_util->resolve_path("modify_news.lte") ) {
+	echo $parser->render(
+		"@news/modify_news.lte",
+		array(
+			'PAGE_ID'  => $page_id,
+			'messages' => $messages,
+			'form' 	   => $form->createView(),
+			'TEXT'     => $TEXT,
+		)
+	);
 }
 
 ```
@@ -165,11 +186,18 @@ if (isset($_POST)) {
 ##### Example modify_news.lte
 
 ```twig
-{{ form_start(form) }}
-    <input type="hidden" name="page_id" value="{{ form.vars.data.page.id }}" />
-    <input type="hidden" name="section_id" value="{{ form.vars.data.section.id }}" />
 
-    {{ form_rest(form) }}
+{% if messages|length > 0 %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.type }}">
+            {{ message.message|raw }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{{ form_start(form) }}
+
+    {{ form_row(form) }}
 
     <div class="form-actions">
         <input name="save" type="submit" value="{{ TEXT.SAVE }}" class="btn btn-primary" />
