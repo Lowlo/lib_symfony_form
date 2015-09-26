@@ -54,9 +54,6 @@ $parser->addExtension(
 	)
 );
 
-/** @var \Symfony\Component\Form\FormFactoryInterface $formFactory */
-global $formFactory;
-
 //($name, array $connections, array $managers, $defaultConnection, $defaultManager, $proxyInterfaceName)
 $managerRegistry = new \LibSymfonyForm\Persistence\ManagerRegistry(
 	null,
@@ -72,4 +69,4 @@ $builder = new \Symfony\Component\Form\FormFactoryBuilder();
 $builder->addExtension(new \Symfony\Component\Form\Extension\Core\CoreExtension());
 $builder->addExtension(new \Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension($managerRegistry));
 
-$formFactory = $builder->getFormFactory();
+global $builder;

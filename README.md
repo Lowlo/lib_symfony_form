@@ -113,10 +113,10 @@ class NewsType extends AbstractType
 ##### Example modify_news.php
 
 ```php
-global $parser, $loader, $formFactory;
+global $parser, $loader, $builder;
 <?php
 
-if (!isset($formFactory)) {
+if (!isset($builder)) {
 	//Require de la lib form & twig
 	require_once( LEPTON_PATH."/modules/lib_symfony_form/library.php" );
 }
@@ -145,7 +145,7 @@ if(!isset($_GET['news_id']) OR !is_numeric($_GET['news_id'])) {
 }
 
 $news = $entityManager->getRepository('News\Entity\News')->find($news_id);
-$form  = $formFactory->create(new \News\Form\NewsType(), $news);
+$form  = $builder->getFormFactory()->create(new \News\Form\NewsType(), $news);
 
 $messages = array();
 if (!empty($_POST)) {
