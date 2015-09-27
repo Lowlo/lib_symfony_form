@@ -1,33 +1,33 @@
 # lib_symfony_form
 #### lib_symfony_form for Lepton CMS 2 series
 
-This module include the lib_twig module so, if you use this module in your module you do not have to include the lib_twig library file
+This module require the lib_twig module.
 
-All the documentation about symfony_form can be see here:
-
-http://symfony.com/fr/doc/current/reference/forms/types.html
-
+All the documentation about Symfony Form component can be see here:
 http://symfony.com/doc/current/components/form/introduction.html
 
-Each form might have a FormType file.
+And examples how to use here:
+http://symfony.com/fr/doc/current/reference/forms/types.html
 
 The example below use the lib_doctrine (cf. https://github.com/loremipsum31/lib_doctrine):
 
-A form for entity group => GroupType see below
+An entity News with a form NewsType
 
 ------
 
 ##### Exemple doctrine entities
 
-```
-#modules/articles/Entity/Group.php
-namespace Articles\Entity;
+```php
+#modules/news/Entity/News.php
+<?php
+
+namespace News\Entity;
 
 /**
- * @ORM\Table(name="lep_mod_articles_groups")
+ * @ORM\Table(name="lep_mod_news")
  * @ORM\Entity
  */
-class Group
+class News
 {
     /**
      * @var \Section
@@ -56,20 +56,30 @@ class Group
      * @ORM\Column(name="active", type="boolean", nullable=false)
      */
     protected $active = false;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="content", type="text", nullable=false)
+     */
+    protected $content = '';
+    
+    //Getter and setter must be define
 ```
 
 ##### Example Symfony form
 
-```
-#modules/articles/Form/GroupType.php
+```php
+#modules/news/Form/NewsType.php
+<?php
 
-namespace Articles\Form;
+namespace News\Form;
 
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class GroupType extends AbstractType
+class NewsType extends AbstractType
 {
 
     /**
@@ -84,6 +94,7 @@ class GroupType extends AbstractType
             ->add('active', 'checkbox', array(
                 'required' => false,
             ))
+            ->add('content', new Wysiwyg())
         ;
     }
 
@@ -94,28 +105,30 @@ class GroupType extends AbstractType
      */
     public function getName()
     {
-        return 'post_group';
+        return 'news_form';
     }
 }
 ```
 
-##### Example modify.php
+##### Example modify_news.php
 
-```
-global $parser, $loader, $formFactory;
-if (!isset($formFactory)) {
+```php
+global $parser, $loader, $builder;
+<?php
+
+if (!isset($builder)) {
 	//Require de la lib form & twig
 	require_once( LEPTON_PATH."/modules/lib_symfony_form/library.php" );
 }
 
-$loader->prependPath( dirname(__FILE__)."/templates/backend/", "article" );
+$loader->prependPath( dirname(__FILE__)."/templates/backend/", "news" );
 
-$frontend_template_path = LEPTON_PATH."/templates/" . DEFAULT_TEMPLATE . "/backend/article/";
+$frontend_template_path = LEPTON_PATH."/templates/" . DEFAULT_TEMPLATE . "/backend/news/";
 $module_template_path = dirname(__FILE__)."/templates/backend/";
 
 require_once (LEPTON_PATH."/modules/lib_twig/classes/class.twig_utilities.php");
 $twig_util = new twig_utilities( $parser, $loader, $module_template_path, $frontend_template_path );
-$twig_util->template_namespace = "article";
+$twig_util->template_namespace = "news";
 
 /** @var $entityManager \Doctrine\ORM\EntityManager */
 global $entityManager;
@@ -123,32 +136,68 @@ if (!isset($entityManager)) {
 	require_once(LEPTON_PATH."/modules/lib_doctrine/library.php");
 }
 
+// Get id
+if(!isset($_GET['news_id']) OR !is_numeric($_GET['news_id'])) {
+	header("Location: ".ADMIN_URL."/pages/index.php");
+	exit(0);
+} else {
+	$news_id = (int)$_GET['news_id'];
+}
 
-$group = $entityManager->getRepository('Articles\Entity\Group')->find($group_id);
+$news = $entityManager->getRepository('News\Entity\News')->find($news_id);
+$form  = $builder->getFormFactory()->create(new \News\Form\NewsType(), $news);
 
-$form = $formFactory->create(new \Articles\Form\GroupType(), $group);
+$messages = array();
+if (!empty($_POST)) {
+	$form->handleRequest();
+	if($form->isValid()){
+		try{
+			$entityManager->persist($news);
+			$entityManager->flush();
+			$admin->print_success($TEXT['SUCCESS'], ADMIN_URL . '/pages/modify.php?page_id=' . $page_id);
+		}catch (\Exception $e) {
+			$messages[] = array(
+				'type' => 'error',
+				'message' => $e->getMessage(),
+			);
+		}
+	} else {
+		$messages[] = array(
+			'type' => 'error',
+			'message' => $MESSAGE['GENERIC']['FILL_IN_ALL']
+		);
+	}
+}
 
-if (true === $twig_util->resolve_path("modify_group.lte") ) {
+if (true === $twig_util->resolve_path("modify_news.lte") ) {
 	echo $parser->render(
-		"@news_events/modify_group.lte",
+		"@news/modify_news.lte",
 		array(
-			'form' 	  => $form->createView(),
-			'TEXT'    => $TEXT,
+			'PAGE_ID'  => $page_id,
+			'messages' => $messages,
+			'form' 	   => $form->createView(),
+			'TEXT'     => $TEXT,
 		)
 	);
 }
 
 ```
 
-##### Example modify_group.lte
+##### Example modify_news.lte
 
-```
-{{ form_start(form, {attr: {class: 'form-horizontal' }, action: WB_URL ~ '/modules/articles/save_group.php'}) }}
-    <input type="hidden" name="group_id" value="{{ form.vars.data.id }}" />
-    <input type="hidden" name="page_id" value="{{ form.vars.data.page.id }}" />
-    <input type="hidden" name="section_id" value="{{ form.vars.data.section.id }}" />
+```twig
 
-    {{ form_rest(form) }}
+{% if messages|length > 0 %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.type }}">
+            {{ message.message|raw }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{{ form_start(form) }}
+
+    {{ form_row(form) }}
 
     <div class="form-actions">
         <input name="save" type="submit" value="{{ TEXT.SAVE }}" class="btn btn-primary" />
@@ -157,54 +206,4 @@ if (true === $twig_util->resolve_path("modify_group.lte") ) {
     </div>
 
 {{ form_end(form) }}
-```
-
-##### Example save_group.php
-
-```
-global $parser, $loader, $formFactory;
-if (!isset($formFactory)) {
-	//Require de la lib form & twig
-	require_once( LEPTON_PATH."/modules/lib_symfony_form/library.php" );
-}
-
-$loader->prependPath( dirname(__FILE__)."/templates/backend/", "article" );
-
-$frontend_template_path = LEPTON_PATH."/templates/" . DEFAULT_TEMPLATE . "/backend/article/";
-$module_template_path = dirname(__FILE__)."/templates/backend/";
-
-require_once (LEPTON_PATH."/modules/lib_twig/classes/class.twig_utilities.php");
-$twig_util = new twig_utilities( $parser, $loader, $module_template_path, $frontend_template_path );
-$twig_util->template_namespace = "article";
-
-/** @var $entityManager \Doctrine\ORM\EntityManager */
-global $entityManager;
-if (!isset($entityManager)) {
-	require_once(LEPTON_PATH."/modules/lib_doctrine/library.php");
-}
-
-
-$group = $entityManager->getRepository('Articles\Entity\Group')->find($group_id);
-
-$form = $formFactory->create(new \Articles\Form\GroupType(), $group);
-
-
-$form->handleRequest();
-if($form->isValid()){
-	try{
-		$entityManager->persist($group);
-		$entityManager->flush();
-		$admin->print_success($TEXT['SUCCESS'], ADMIN_URL.'/pages/modify.php?page_id='.$page_id);
-	}catch (\Exception $e) {
-		$admin->print_error(
-			$e->getMessage(),
-			WB_URL.'/modules/articles/modify_group.php?page_id='.$page_id.'&section_id='.$section_id.'&group_id='.$group->getId()
-		);
-	}
-} else {
-	$admin->print_error(
-		$MESSAGE['GENERIC']['FILL_IN_ALL'],
-		WB_URL.'/modules/articles/modify_group.php?page_id='.$page_id.'&section_id='.$section_id.'&group_id='.$id
-	);
-}
 ```

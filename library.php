@@ -40,7 +40,7 @@ require_once(LEPTON_PATH . '/modules/lib_symfony_form/Twig/TranslateExtension.ph
 $parser->addExtension(new \LibSymfonyForm\Twig\TranslateExtension());
 
 $vendorDir = LEPTON_PATH . '/modules/lib_symfony_form/vendor';
-$defaultFormTheme = 'bootstrap_3_layout.lte';
+$defaultFormTheme = 'form_custom.lte';
 
 $loader->addPath($vendorDir . '/symfony/twig-bridge/Resources/views/Form');
 $loader->addPath(LEPTON_PATH . '/modules/lib_symfony_form/Resources/views/Form');
@@ -54,12 +54,6 @@ $parser->addExtension(
 	)
 );
 
-/** @var \Symfony\Component\Form\FormFactoryInterface $formFactory */
-global $formFactory;
-
-$container = new \Symfony\Component\DependencyInjection\Container(
-	new \Symfony\Component\DependencyInjection\ParameterBag\ParameterBag()
-);
 //($name, array $connections, array $managers, $defaultConnection, $defaultManager, $proxyInterfaceName)
 $managerRegistry = new \LibSymfonyForm\Persistence\ManagerRegistry(
 	null,
@@ -69,10 +63,10 @@ $managerRegistry = new \LibSymfonyForm\Persistence\ManagerRegistry(
 	null,
 	'\Doctrine\ORM\Proxy\Proxy'
 );
-$container->set('doctrine.entity_manager', $entityManager);
-$managerRegistry->setContainer($container);
+$managerRegistry->setService('doctrine.entity_manager', $entityManager);
+
 $builder = new \Symfony\Component\Form\FormFactoryBuilder();
 $builder->addExtension(new \Symfony\Component\Form\Extension\Core\CoreExtension());
 $builder->addExtension(new \Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension($managerRegistry));
 
-$formFactory = $builder->getFormFactory();
+global $builder;
