@@ -18,18 +18,12 @@ class Wysiwyg extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        $full_name = sprintf('%s[%s]', $form->getParent()->getName(), $form->getName());
+        $id = sprintf('%s_%s', $form->getParent()->getName(), $form->getName());
         require_once(WB_PATH . '/modules/' . WYSIWYG_EDITOR . '/include.php');
         ob_start();
-        show_wysiwyg_editor("long", "long", $view->vars['value']);
+        show_wysiwyg_editor($full_name, $id, $view->vars['value']);
         $view->vars['wysiwyg'] = ob_get_clean();
-    }
-
-    /**
-     * @param OptionsResolver $resolver
-     */
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefault('mapped', false);
     }
 
     /**
