@@ -1,5 +1,13 @@
 {% extends 'form_table_layout.html.twig' %}
 
+
+{% block color_widget %}
+    {% spaceless %}
+        {% set type = 'color' %}
+        {{ block('form_widget_simple') }}
+    {% endspaceless %}
+{% endblock %}
+
 {% block wysiwyg_widget %}
     {{ wysiwyg|raw }}
 {% endblock %}
