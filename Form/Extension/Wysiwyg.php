@@ -20,6 +20,8 @@ class Wysiwyg extends AbstractType
     {
         $full_name = sprintf('%s[%s]', $form->getParent()->getName(), $form->getName());
         $id = sprintf('%s_%s', $form->getParent()->getName(), $form->getName());
+        global $id_list;
+        $id_list = array();
         require_once(WB_PATH . '/modules/' . WYSIWYG_EDITOR . '/include.php');
         ob_start();
         show_wysiwyg_editor($full_name, $id, $view->vars['value']);
