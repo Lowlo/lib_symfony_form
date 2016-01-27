@@ -42,6 +42,7 @@ $parser->addExtension(new \LibSymfonyForm\Twig\TranslateExtension());
 $vendorDir = LEPTON_PATH . '/modules/lib_symfony_form/vendor';
 $defaultFormTheme = 'form_custom.lte';
 
+$loader->addPath(LEPTON_PATH . '/templates/' . DEFAULT_THEME . '/backend');
 $loader->addPath($vendorDir . '/symfony/twig-bridge/Resources/views/Form');
 $loader->addPath(LEPTON_PATH . '/modules/lib_symfony_form/Resources/views/Form');
 
